@@ -1,0 +1,3 @@
+name: finitary
+depend: standard-library distinct-disjoint
+include: src
