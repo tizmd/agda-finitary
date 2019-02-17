@@ -15,14 +15,6 @@ module Data.Fin.Subset.Cardinality where
   open import Function
   open import Algebra  
 
-  size : ∀ {n} → Subset n → ℕ
-  size [] = 0
-  size (outside ∷ xs) = size xs
-  size (inside ∷ xs) = suc (size xs)
-
-  ∣_∣ : ∀ {n} → Subset n → ℕ
-  ∣_∣ = size
-
   _∖_ : ∀ {n} → Subset n → Subset n → Subset n
   _∖_ {n} a b = a ∩ ∁ b
 
@@ -84,14 +76,7 @@ module Data.Fin.Subset.Cardinality where
 
 
   disjoint-∪≡ : ∀ {n} {a b : Subset n} → a ∩ b ≡ ⊥ → ∣ a ∪ b ∣ ≡ ∣ a ∣ ℕ.+ ∣ b ∣
-  disjoint-∪≡ {zero} {[]} {[]} eq = refl
-  disjoint-∪≡ {suc n} {outside ∷ a} {outside ∷ b} eq with ∷-injective eq
-  ... | _ , teq = disjoint-∪≡ teq
-  disjoint-∪≡ {suc n} {outside ∷ a} {inside ∷ b} eq with ∷-injective eq
-  ... | _ , teq rewrite disjoint-∪≡ teq = sym (+-suc (size a) (size b))
-  disjoint-∪≡ {suc n} {inside ∷ a} {outside ∷ b} eq with ∷-injective eq
-  ... | _ , teq = cong suc (disjoint-∪≡ teq)
-  disjoint-∪≡ {suc n} {true ∷ a} {true ∷ b} ()
+  disjoint-∪≡ = ?
 
   module _ {n : ℕ} where
     open BooleanAlgebra (booleanAlgebra n) public using ()

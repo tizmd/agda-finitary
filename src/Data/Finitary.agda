@@ -19,9 +19,9 @@ Finitary A n = Inverse A (P.setoid (Fin n))
 
 module Subset where
   open import Data.Product as Prod hiding (map)
-  open import Data.Fin.Subset using (Subset; _∈_; outside; inside) renaming (⊥ to ∅)
-  open import Data.Fin.Subset.Cardinality using (∣_∣) 
-  open import Data.Vec hiding (_∈_)
+  open import Data.Fin.Subset using (Subset; _∈_; outside; inside; ∣_∣) renaming (⊥ to ∅)
+--  open import Data.Fin.Subset.Cardinality using (∣_∣) 
+  open import Data.Vec 
   subset-finitary : ∀ {n}(s : Subset n) → Finitary (P.setoid (∃ (_∈ s))) ∣ s ∣
   subset-finitary {ℕ.zero} [] = record {
       to = P.→-to-⟶ (λ ())
@@ -33,13 +33,13 @@ module Subset where
     }
   subset-finitary {ℕ.suc n} (inside ∷ s) = record {
         to = P.→-to-⟶ λ { (_ , here) → Fin.zero 
-                          ; (_ , there p) → Fin.suc (to ⟨$⟩ (, p)) } 
-      ; from = P.→-to-⟶ λ { Fin.zero → , here
-                           ; (Fin.suc i) → , there (proj₂ (from ⟨$⟩ i))}
+                          ; (_ , there p) → Fin.suc (to ⟨$⟩ (_ , p)) } 
+      ; from = P.→-to-⟶ λ { Fin.zero → _ , here
+                           ; (Fin.suc i) → _ , there (proj₂ (from ⟨$⟩ i))}
       ; inverse-of = record {
             left-inverse-of = λ { (_ , here) → P.refl
                                  ; (_ , there p) → P.cong
-                                   (Prod.map Fin.suc there) (linv (, p))}
+                                   (Prod.map Fin.suc there) (linv (_ , p))}
           ; right-inverse-of = λ { Fin.zero → P.refl
                                  ; (Fin.suc i) → P.cong Fin.suc (rinv i)}
         }
@@ -50,11 +50,11 @@ module Subset where
                                            ;right-inverse-of to rinv)
       
   subset-finitary {ℕ.suc n} (outside ∷ s) = record {
-      to = P.→-to-⟶ (λ { (_ , there p) → to ⟨$⟩ (, p)})
+      to = P.→-to-⟶ (λ { (_ , there p) → to ⟨$⟩ (_ , p)})
     ; from = P.→-to-⟶ (λ i → Prod.map Fin.suc there (from ⟨$⟩ i) )
     ; inverse-of = record {
            left-inverse-of = λ { (_ , there p) →
-             P.cong (Prod.map Fin.suc there) (linv (, p)) }
+             P.cong (Prod.map Fin.suc there) (linv (_ , p)) }
          ; right-inverse-of = rinv
       }
     }

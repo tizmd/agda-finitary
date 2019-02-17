@@ -25,14 +25,14 @@ exponent {m} {n} = record {
   }
   where
     open import Data.Nat.Properties 
-    open import Data.Fin.Properties hiding (≤-refl; _≟_)
+    open import Data.Fin.Properties hiding (≤-refl; _≟_; <-cmp)
     open import Relation.Nullary.Negation 
     shift : ∀ {m n} (i : Fin m)(j : Fin n) → toℕ j + (toℕ i) * n < m * n
     shift {m}{n} i j =
               begin suc (toℕ j) + toℕ i * n  
-                ≤⟨ +-mono-≤ (bounded j) (≤-refl {(toℕ i) * n}) ⟩
+                ≤⟨ +-mono-≤ (toℕ<n j) (≤-refl {(toℕ i) * n}) ⟩
                   n + toℕ i * n 
-                ≤⟨ *-mono-≤ (bounded i) ≤-refl ⟩ m * n ∎ 
+                ≤⟨ *-mono-≤ (toℕ<n i) ≤-refl ⟩ m * n ∎ 
           where
             open ≤-Reasoning
     to : ∀ {m n} → Vec (Fin m) n → Fin (m ^ n)
@@ -52,7 +52,7 @@ exponent {m} {n} = record {
       = Fin.fromℕ≤ q<sm  ∷ from remainder
       where
         q<sm : quotient < suc m
-        q<sm = ≰⇒> (λ sm≤q → <⇒≱ (bounded i)
+        q<sm = ≰⇒> (λ sm≤q → <⇒≱ (toℕ<n i)
                 (begin (suc m) * (suc m ^ n)
                    ≤⟨ *-mono-≤ sm≤q ≤-refl ⟩ quotient * (suc m ^ n)
                    ≤⟨ +-mono-≤ (z≤n {toℕ remainder}) ≤-refl ⟩ toℕ remainder + quotient * (suc m ^ n)
@@ -72,7 +72,7 @@ exponent {m} {n} = record {
         open ≤-Reasoning    
         contra : k₀ ≢ k₁ → ⊥
         contra k₀≢k₁ with ≢→<⊎> k₀≢k₁
-        ... | inj₁ k₀<k₁ = <⇒≱  (bounded r₀) (+-cancelʳ-≤ (suc m) (toℕ r₀)
+        ... | inj₁ k₀<k₁ = <⇒≱  (toℕ<n r₀) (+-cancelʳ-≤ (suc m) (toℕ r₀)
                                  (begin suc m + k₀ * suc m
                                    ≡⟨ refl ⟩ suc k₀ * suc m
                                    ≤⟨ *-mono-≤ (m≤m+n (suc k₀) (k₁ ∸ suc k₀)) (≤-refl {suc m}) ⟩
@@ -80,7 +80,7 @@ exponent {m} {n} = record {
                                    ≡⟨ P.cong₂ _*_ (m+n∸m≡n k₀<k₁) refl ⟩ k₁ * suc m
                                    ≤⟨ n≤m+n (toℕ r₁) (k₁ * suc m)  ⟩ toℕ r₁ + k₁ * suc m
                                    ≡⟨ P.sym eq ⟩ toℕ r₀ + k₀ * suc m ∎))
-        ... | inj₂ k₁<k₀ = <⇒≱  (bounded r₁) (+-cancelʳ-≤  (suc m) (toℕ r₁)
+        ... | inj₂ k₁<k₀ = <⇒≱  (toℕ<n r₁) (+-cancelʳ-≤  (suc m) (toℕ r₁)
                   (begin suc k₁ * suc m
                          ≤⟨ *-mono-≤ (m≤m+n (suc k₁) (k₀ ∸ suc k₁)) (≤-refl {suc m}) ⟩
                          (suc k₁ + (k₀ ∸ suc k₁)) * suc m
@@ -119,7 +119,7 @@ exponent {m} {n} = record {
     to∘from {suc m} {suc n} i | result quotient remainder property = goal
       where
         q<sm : quotient < suc m
-        q<sm = ≰⇒> (λ sm≤q → <⇒≱ (bounded i)
+        q<sm = ≰⇒> (λ sm≤q → <⇒≱ (toℕ<n i)
                 (begin (suc m) * (suc m ^ n)
                    ≤⟨ *-mono-≤ sm≤q ≤-refl ⟩ quotient * (suc m ^ n)
                    ≤⟨ +-mono-≤ (z≤n {toℕ remainder}) ≤-refl ⟩ toℕ remainder + quotient * (suc m ^ n)
@@ -161,10 +161,46 @@ exponent {m} {n} = record {
                            (P.cong (flip Vec.lookup vec) (F.cong (Inverse.to finA) x≈y))
                        
         
-⟶-finitary↔Vec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A m → Finitary B n
+⟶-finitary↔Vec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A n → Finitary B m
                  → Inverse (A ⇨ B) (P.setoid (Vec (Fin m) n))
-⟶-finitary↔Vec finA finB = {!!}
+Inverse.to (⟶-finitary↔Vec {m} {n} {A = S₁} {S₂} finA finB) ._⟨$⟩_ = ⟶-finitary-toVec finA finB
+Inverse.to (⟶-finitary↔Vec {m} {n} {A = S₁} {S₂} finA finB) .F.cong {f} {g} eq = tabulate-cong ( λ i →
+  F.cong (Inverse.to finB) (eq ≈₁-refl) )
+  where
+    open import Data.Vec.Properties 
+    open Setoid S₁ renaming (isEquivalence to isEquivalence₁)
+    open IsEquivalence isEquivalence₁ renaming (refl to ≈₁-refl)
 
-⟶-finitary : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A m → Finitary B n
+Inverse.from (⟶-finitary↔Vec finA finB) = P.→-to-⟶ (⟶-finitary-fromVec finA finB)
+Inv._InverseOf_.left-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec {m = m}{n}{A = S₁} {S₂} finA finB)) f {x}{y} x≈y = 
+  begin⟨ S₂ ⟩ ⟶-finitary-fromVec finA finB (⟶-finitary-toVec finA finB f) ⟨$⟩ x
+         ≈⟨ F.cong (Inverse.from finB) lemma  ⟩ _
+         ≈⟨ linv₂ _  ⟩ _
+         ≈⟨ F.cong f (linv₁ x) ⟩ _
+         ≈⟨ F.cong f x≈y ⟩ f ⟨$⟩ y ∎
+  where
+    open import Data.Vec.Properties
+    open import Relation.Binary.SetoidReasoning 
+    open Setoid S₁ renaming (isEquivalence to isEquivalence₁)
+    open IsEquivalence isEquivalence₁ renaming (refl to ≈₁-refl; trans to ≈₁-trans)
+    open Setoid S₂ renaming (isEquivalence to isEquivalence₂)
+    open IsEquivalence isEquivalence₂ renaming (refl to ≈₂-refl; trans to ≈₂-trans)
+    F = (Inverse.to finB  F.∘ f F.∘ Inverse.from finA) ⟨$⟩_
+    lemma = lookup∘tabulate F (Inverse.to finA ⟨$⟩ x)
+    linv₁ = finA .Inverse.inverse-of .Inv._InverseOf_.left-inverse-of
+    linv₂ = finB .Inverse.inverse-of .Inv._InverseOf_.left-inverse-of
+Inv._InverseOf_.right-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec finA finB)) vec =
+  begin _  ≡⟨ tabulate-cong lemma ⟩ _ 
+           ≡⟨ tabulate∘lookup vec ⟩ vec ∎
+  where
+    open import Data.Vec.Properties
+    open P.≡-Reasoning
+    rinv₁ = finA .Inverse.inverse-of .Inv._InverseOf_.right-inverse-of
+    rinv₂ = finB .Inverse.inverse-of .Inv._InverseOf_.right-inverse-of
+    lemma : Inverse.to finB F.∘ (⟶-finitary-fromVec finA finB vec) F.∘ Inverse.from finA ⟨$⟩_ ≗ flip lookup vec
+    lemma i = begin _ ≡⟨ rinv₂ _ ⟩ _
+                      ≡⟨ P.cong (flip lookup vec) (rinv₁ i)  ⟩ lookup i vec ∎
+                      
+⟶-finitary : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A n → Finitary B m
                  → Finitary (A ⇨ B) (m ^ n)
 ⟶-finitary finA finB = exponent  Inv.∘ (⟶-finitary↔Vec finA finB)                 
