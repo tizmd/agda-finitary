@@ -8,6 +8,7 @@ open import Function.Injection as Inj using (Injective)
 open import Function.Inverse as Inv using (Inverse)
 open import Data.Vec
 open import Data.Vec.Membership.Propositional
+open import Data.Vec.Membership.Propositional.Properties
 open import Data.Vec.Membership.Propositional.Distinct as Distinct using (Distinct)
 
 record FinType {a} (A : Set a) : Set a where
@@ -35,7 +36,7 @@ record FinType {a} (A : Set a) : Set a where
   elems-distinct = Distinct.tabulate (Inverse.injection (Inv.sym finitary))
 
   _∈elems : ∀ x → x ∈ elems
-  x ∈elems rewrite P.sym (Inverse.left-inverse-of finitary x) = {!!} -- ∈-tabulate enum (index x)
+  x ∈elems rewrite P.sym (Inverse.left-inverse-of finitary x) = ∈-tabulate⁺ enum (index x)
   
 open FinType ⦃ ... ⦄ using (index ; _∈elems)
 
@@ -88,5 +89,9 @@ instance
           }
           }
           }
-example : Vec Bool _
-example = (elems Bool)  
+private          
+  bools : Vec Bool _
+  bools = elems Bool  
+
+  example : bools ≡ false ∷ true ∷ []
+  example = P.refl

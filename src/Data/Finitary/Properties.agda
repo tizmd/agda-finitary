@@ -1,8 +1,9 @@
 module Data.Finitary.Properties where
 open import Data.Fin as Fin using (Fin; #_ )
 open import Data.Fin.Properties hiding (decSetoid)
-open import Relation.Nullary 
-open import Relation.Binary renaming (Decidable to Dec₂)
+open import Relation.Nullary
+open import Relation.Unary 
+open import Relation.Binary renaming (Decidable to Dec₂) hiding (Irrelevant)
 open import Relation.Binary.PropositionalEquality as P hiding (decSetoid; isEquivalence)
 open import Data.Finitary
 open import Function.Equality as F using (_⟨$⟩_) 
@@ -35,6 +36,7 @@ same-size↔ fin₁ fin₂ = Inv.sym fin₂ Inv.∘  fin₁
 size-unique : ∀ {a ℓ} {A : Setoid a ℓ} {n m} → Finitary A n → Finitary A m → n ≡ m
 size-unique finN finM = finitary→≡ (finM Inv.∘ Inv.sym finN)
 
+{-
 open import Data.Empty
 open import Data.Unit
 
@@ -43,16 +45,14 @@ Irr S = ∀ x y → x ≈ y
   where
     open Setoid S 
 
-⊥-Irr : Irr (P.setoid ⊥)
+
+⊥-Irr : Irrelevant ⊥
 ⊥-Irr = λ ()
 
-⊤-Irr : Irr (P.setoid ⊤)
+⊤-Irr : Irrelevant ⊤
 ⊤-Irr = λ _ _ → P.refl
 
-≡-Irr : ∀{a}(A : Set a) → ∀ {x y : A} → Irr (P.setoid (x ≡ y))
-≡-Irr A = P.proof-irrelevance
-
-Irr-finitary : ∀ {a ℓ n}{S : Setoid a ℓ} → Irr S → Finitary S n → n ℕ.≤ 1
+Irr-finitary : ∀ {a ℓ n}{S : Set a} → Irrelevant S → Finitary (P.setoid S) n → n ℕ.≤ 1
 Irr-finitary {n = ℕ.zero} irr fin = z≤n
 Irr-finitary {n = ℕ.suc ℕ.zero} irr fin = s≤s z≤n
 Irr-finitary {n = ℕ.suc (ℕ.suc n)}{S} irr fin = ⊥-elim contra
@@ -64,3 +64,4 @@ Irr-finitary {n = ℕ.suc (ℕ.suc n)}{S} irr fin = ⊥-elim contra
      contra : ⊥
      contra with Inverse.injective (Inv.sym fin) (irr x₀ x₁)
      ... | ()
+-}
