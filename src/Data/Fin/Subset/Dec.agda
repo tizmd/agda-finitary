@@ -1,3 +1,5 @@
+{-# OPTIONS --safe --without-K #-}
+
 module Data.Fin.Subset.Dec where
 open import Data.Nat as ℕ 
 open import Data.Fin as Fin
