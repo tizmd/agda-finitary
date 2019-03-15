@@ -9,7 +9,7 @@ open import Relation.Unary renaming (Decidable to Decidable₁) using ()
 open import Function using (_∘_)
 open import Data.Vec using ([]; _∷_)
   
-subset : ∀ {n} {P : Fin n → Set} → Decidable₁ P → Subset n
+subset : ∀ {n}{p} {P : Fin n → Set p} → Decidable₁ P → Subset n
 subset {zero} dec = []
 subset {suc n} dec with dec (# 0)
 subset {suc n} dec | yes p0 = inside ∷ subset (dec ∘ Fin.suc)

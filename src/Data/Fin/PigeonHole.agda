@@ -1,3 +1,4 @@
+{-# OPTIONS --safe --without-K #-}
 module Data.Fin.PigeonHole where
 
 open import Data.Fin as Fin

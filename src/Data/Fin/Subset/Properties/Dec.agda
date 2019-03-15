@@ -1,3 +1,4 @@
+{-# OPTIONS --safe --without-K #-}
 module Data.Fin.Subset.Properties.Dec where
 
 open import Data.Nat as ℕ 
@@ -15,48 +16,48 @@ open import Function using (_∘_)
 open import Function.Equivalence using (_⇔_ ; equivalence)
 open import Relation.Nullary.Negation using (¬?)
   
-subset¬⊆∁subset : ∀ {n} {P : Fin n → Set}{p : Decidable₁ P} → subset (¬? ∘ p) ⊆ ∁ (subset p)
-subset¬⊆∁subset {zero} {p = p} ()
-subset¬⊆∁subset {suc n} {p = p} x∈s with p (# 0)
-subset¬⊆∁subset {suc n} {p = p} here | no ¬p0 = here
-subset¬⊆∁subset {suc n} {p = p} (there x∈s) | no ¬p0 = there (subset¬⊆∁subset {p = p ∘ suc} x∈s)
-subset¬⊆∁subset {suc n} {p = p} (there x∈s) | yes p0 = there (subset¬⊆∁subset {p = p ∘ suc} x∈s)
+subset¬⊆∁subset : ∀ {n}{p} {P : Fin n → Set p}(P? : Decidable₁ P) → subset (¬? ∘ P?) ⊆ ∁ (subset P?)
+subset¬⊆∁subset {zero} P? ()
+subset¬⊆∁subset {suc n} P? x∈s with P? (# 0)
+subset¬⊆∁subset {suc n} P? here | no ¬p0 = here
+subset¬⊆∁subset {suc n} P? (there x∈s) | no ¬p0 = there (subset¬⊆∁subset (P? ∘ suc) x∈s)
+subset¬⊆∁subset {suc n} P? (there x∈s) | yes p0 = there (subset¬⊆∁subset (P? ∘ suc) x∈s)
 
-∁subset⊆subset¬ : ∀ {n} {P : Fin n → Set}{p : Decidable₁ P} →  ∁ (subset p) ⊆ subset (¬? ∘ p)
-∁subset⊆subset¬  {zero} {p = p} ()
-∁subset⊆subset¬ {suc n} {p = p} x∈s with p (# 0)
-∁subset⊆subset¬ {suc n} {p = p} here | no ¬p0 = here
-∁subset⊆subset¬ {suc n} {p = p} (there x∈s) | yes p0 = there (∁subset⊆subset¬ {p = p ∘ suc} x∈s) 
-∁subset⊆subset¬ {suc n} {p = p} (there x∈s) | no ¬p0 = there (∁subset⊆subset¬ {p = p ∘ suc} x∈s)
+∁subset⊆subset¬ : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P) →  ∁ (subset P?) ⊆ subset (¬? ∘ P?)
+∁subset⊆subset¬  {zero} P? ()
+∁subset⊆subset¬ {suc n} P? x∈s with P? (# 0)
+∁subset⊆subset¬ {suc n} P? here | no ¬p0 = here
+∁subset⊆subset¬ {suc n} P? (there x∈s) | yes p0 = there (∁subset⊆subset¬ (P? ∘ suc) x∈s) 
+∁subset⊆subset¬ {suc n} P? (there x∈s) | no ¬p0 = there (∁subset⊆subset¬ (P? ∘ suc) x∈s)
 
-subset¬≡∁subset  : ∀ {n} {P : Fin n → Set}{p : Decidable₁ P} → subset (¬? ∘ p) ≡ ∁ (subset p)
-subset¬≡∁subset {n} = ⊆-antisym subset¬⊆∁subset ∁subset⊆subset¬
+subset¬≡∁subset  : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P) → subset (¬? ∘ P?) ≡ ∁ (subset P?)
+subset¬≡∁subset {n} P? = ⊆-antisym (subset¬⊆∁subset P?) (∁subset⊆subset¬ P?)
   where
     open Poset (⊆-poset n) renaming (antisym to ⊆-antisym) using () 
 
       
-∈subset⁺ : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P}{x} → P x → x ∈ subset p 
-∈subset⁺ {zero} {p = p} {()} Px
-∈subset⁺ {suc n} {p = p} {x} Px with p (# 0)
-∈subset⁺ {suc n} {p = p} {zero} Px | yes p0 = here
-∈subset⁺ {suc n} {p = p} {suc x} Px | yes p0 = there (∈subset⁺ Px)
-∈subset⁺ {suc n} {p = p} {zero} Px | no ¬p0 = ⊥-elim (¬p0 Px)
-∈subset⁺ {suc n} {p = p} {suc x} Px | no ¬p0 = there (∈subset⁺ Px)
+∈subset⁺ : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P){x} → P x → x ∈ subset P? 
+∈subset⁺ {zero} P? {()} Px
+∈subset⁺ {suc n} P? {x} Px with P? (# 0)
+∈subset⁺ {suc n} P? {zero} Px | yes p0 = here
+∈subset⁺ {suc n} P? {suc x} Px | yes p0 = there (∈subset⁺ (P? ∘ suc) Px)
+∈subset⁺ {suc n} P? {zero} Px | no ¬p0 = ⊥-elim (¬p0 Px)
+∈subset⁺ {suc n} P? {suc x} Px | no ¬p0 = there (∈subset⁺ (P? ∘ suc) Px)
 
-∈subset⁻ : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P}{x} → x ∈ subset p → P x 
-∈subset⁻ {zero} {p = p} {()} x∈s
-∈subset⁻ {suc n} {p = p} {x} x∈s with p (# 0)
-∈subset⁻ {suc n} {p = p} {zero} here | yes p0 = p0
-∈subset⁻ {suc n} {p = p} {suc x} (there x∈s) | yes p0 = ∈subset⁻ {p = p ∘ suc} x∈s 
-∈subset⁻ {suc n} {p = p} {.(suc _)} (there x∈s) | no ¬p0 = ∈subset⁻ {p = p ∘ suc} x∈s 
+∈subset⁻ : ∀ {n}{p} {P : Fin n → Set p}(P? : Decidable₁ P){x} → x ∈ subset P? → P x 
+∈subset⁻ {zero} P? {()} x∈s
+∈subset⁻ {suc n} P? {x} x∈s with P? (# 0)
+∈subset⁻ {suc n} P? {zero} here | yes p0 = p0
+∈subset⁻ {suc n} P? {suc x} (there x∈s) | yes p0 = ∈subset⁻ (P? ∘ suc) x∈s 
+∈subset⁻ {suc n} P? {.(suc _)} (there x∈s) | no ¬p0 = ∈subset⁻ (P? ∘ suc) x∈s 
 
-⇔∈subset : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P} {x} → x ∈ subset p ⇔ P x  
-⇔∈subset = equivalence ∈subset⁻ ∈subset⁺
+⇔∈subset : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P) {x} → x ∈ subset P? ⇔ P x  
+⇔∈subset P? = equivalence (∈subset⁻ P?) (∈subset⁺ P?)
 
-∈∁subset⁺ : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P}{x} → ¬ P x → x ∈ ∁ (subset p) 
-∈∁subset⁺  = subset¬⊆∁subset ∘ ∈subset⁺
-∈∁subset⁻ : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P}{x} → x ∈ ∁ (subset p) → ¬ P x 
-∈∁subset⁻ = ∈subset⁻ ∘ ∁subset⊆subset¬ 
+∈∁subset⁺ : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P){x} → ¬ P x → x ∈ ∁ (subset P?) 
+∈∁subset⁺ P?  = subset¬⊆∁subset P? ∘ (∈subset⁺ (¬? ∘ P? ))
+∈∁subset⁻ : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P){x} → x ∈ ∁ (subset P?) → ¬ P x 
+∈∁subset⁻ P? = ∈subset⁻ (¬? ∘ P?) ∘ ∁subset⊆subset¬ P?
 
-⇔∈∁subset : ∀ {n} {P : Fin n → Set}{p :  Decidable₁ P} {x} → x ∈ ∁ (subset p) ⇔ (¬ P x)  
-⇔∈∁subset = equivalence ∈∁subset⁻ ∈∁subset⁺
+⇔∈∁subset : ∀ {n}{p}{P : Fin n → Set p}(P? : Decidable₁ P) {x} → x ∈ ∁ (subset P?) ⇔ (¬ P x)  
+⇔∈∁subset P? = equivalence (∈∁subset⁻ P?) (∈∁subset⁺ P?)
