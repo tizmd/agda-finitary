@@ -20,7 +20,6 @@ Finitary A n = Inverse A (P.setoid (Fin n))
 module Subset where
   open import Data.Product as Prod hiding (map)
   open import Data.Fin.Subset using (Subset; _∈_; outside; inside; ∣_∣) renaming (⊥ to ∅)
---  open import Data.Fin.Subset.Cardinality using (∣_∣) 
   open import Data.Vec 
   subset-finitary : ∀ {n}(s : Subset n) → Finitary (P.setoid (∃ (_∈ s))) ∣ s ∣
   subset-finitary {ℕ.zero} [] = record {

@@ -173,14 +173,14 @@ Inverse.to (⟶-finitary↔Vec {m} {n} {A = S₁} {S₂} finA finB) .F.cong {f} 
 
 Inverse.from (⟶-finitary↔Vec finA finB) = P.→-to-⟶ (⟶-finitary-fromVec finA finB)
 Inv._InverseOf_.left-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec {m = m}{n}{A = S₁} {S₂} finA finB)) f {x}{y} x≈y = 
-  begin⟨ S₂ ⟩ ⟶-finitary-fromVec finA finB (⟶-finitary-toVec finA finB f) ⟨$⟩ x
+  begin ⟶-finitary-fromVec finA finB (⟶-finitary-toVec finA finB f) ⟨$⟩ x
          ≈⟨ F.cong (Inverse.from finB) lemma  ⟩ _
          ≈⟨ linv₂ _  ⟩ _
          ≈⟨ F.cong f (linv₁ x) ⟩ _
          ≈⟨ F.cong f x≈y ⟩ f ⟨$⟩ y ∎
   where
     open import Data.Vec.Properties
-    open import Relation.Binary.SetoidReasoning 
+    open import Relation.Binary.Reasoning.Setoid (S₂)
     open Setoid S₁ renaming (isEquivalence to isEquivalence₁)
     open IsEquivalence isEquivalence₁ renaming (refl to ≈₁-refl; trans to ≈₁-trans)
     open Setoid S₂ renaming (isEquivalence to isEquivalence₂)

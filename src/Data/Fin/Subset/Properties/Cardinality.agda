@@ -10,9 +10,12 @@ open import Data.Vec using (_∷_; [])
 open import Data.Vec.Any  using (here ; there)
 open import Data.Vec.Properties as VP
 open import Data.Product
+open import Data.Sum
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality as Eq 
+open import Relation.Binary.PropositionalEquality as Eq
+open import Relation.Nullary.Negation
 
+open import Function 
 -- some trivial lemma
 
 ∣p∣≡0→≡⊥  : ∀ {n}(p : Subset n) → ∣ p ∣ ≡ 0 → p ≡ ⊥
@@ -57,6 +60,31 @@ disjoint-∪≡+ {ℕ.suc n} (outside ∷ p) (inside ∷ q) dis =
 disjoint-∪≡+ {ℕ.suc n} (inside ∷ p) (outside ∷ q) dis = Eq.cong ℕ.suc (disjoint-∪≡+ p q (VP.∷-injectiveʳ dis))
 disjoint-∪≡+ {ℕ.suc n} (inside ∷ p) (inside ∷ q) ()
 
+
+x∈p⇒⁅x⁆∪p≡p : ∀ {n} (x : Fin n)(p : Subset n) → x ∈ p → ⁅ x ⁆ ∪ p ≡ p
+x∈p⇒⁅x⁆∪p≡p x p x∈p = ⊆-antisym from to
+  where
+    from : ∀ {y} → y ∈ ⁅ x ⁆ ∪ p → y ∈ p
+    from h with x∈p∪q⁻ ⁅ x ⁆ p h
+    from h | inj₁ y∈⁅x⁆ rewrite x∈⁅y⁆⇒x≡y _ y∈⁅x⁆ = x∈p
+    from h | inj₂ y∈p = y∈p
+    
+    
+    to : ∀ {y}  → y ∈ p → y ∈ ⁅ x ⁆ ∪ p
+    to h = x∈p∪q⁺ (inj₂ h)
+
+
+∣⁅x⁆∪p∣≡1+∣p∣⇒x∉p : ∀ {n}(x : Fin n)(p : Subset n) → ∣ ⁅ x ⁆ ∪ p  ∣ ≡ 1 ℕ.+ ∣ p ∣ →  x ∉ p
+∣⁅x⁆∪p∣≡1+∣p∣⇒x∉p x p h x∈p rewrite x∈p⇒⁅x⁆∪p≡p x p x∈p = contradiction h lemma
+  where
+    lemma : ∀ {n} → n ≢ ℕ.suc n
+    lemma ()
+
+∣⁅x⁆∪⁅y⁆∣≡2⇒x≢y : ∀ {n}(x y : Fin n) → ∣ ⁅ x ⁆ ∪ ⁅ y ⁆  ∣ ≡ 2 →  x ≢ y
+∣⁅x⁆∪⁅y⁆∣≡2⇒x≢y x .x h refl with ∣⁅x⁆∪p∣≡1+∣p∣⇒x∉p x ⁅ x ⁆ (trans h (cong ℕ.suc (sym (∣⁅x⁆∣≡1 x))))
+... | x∉⁅y⁆ = contradiction (x∈⁅x⁆ _) x∉⁅y⁆
+
+
 module _ {n : ℕ} where
   open import Algebra.Structures {A = Subset n} _≡_
   open IsBooleanAlgebra (∪-∩-isBooleanAlgebra n) renaming (∧-complementʳ to ∩-complementʳ; ∨-complementʳ to ∪-complementʳ) 
@@ -74,34 +102,12 @@ module _ {n : ℕ} where
 ∩≤ʳ : ∀ {n} (a b : Subset n) → ∣ a ∩ b ∣  ℕ.≤  ∣ b ∣
 ∩≤ʳ {n} a b = p⊆q⇒∣p∣<∣q∣ (p∩q⊆q a b)
 
-{-
-  module _ {n : ℕ} where
-    open BooleanAlgebra (booleanAlgebra n) public using ()
-      renaming (∨-complementʳ to ∪-complementʳ;
-                ∧-complementʳ to ∩-complementʳ;
-                ∨-∧-distribʳ   to ∪-∩-distribʳ
-                )
-
-    open import Algebra.Properties.BooleanAlgebra as BA
-    open BA (booleanAlgebra n) public using ()
-      renaming (∨-identityʳ to ∪-identityʳ;
-                ∧-identityʳ to ∩-identityʳ;
-                ∨-zeroʳ to ∪-zeroʳ;
-                ∧-zeroʳ to ∩-zeroʳ;
-                ∨-∧-commutativeSemiring to ∪-∩-commutativeSemiring
-                )
-                
-    open CommutativeSemiring (∪-∩-commutativeSemiring) public renaming (distrib to ∪-∩-distrib) using ()
-  -- complement
-     
-  size-complement : ∀ {n} (a : Subset n) → ∣ a ∣  ℕ.+ ∣ ∁ a ∣ ≡ n
-  size-complement {n} a = begin ∣ a ∣  ℕ.+ ∣ ∁ a ∣ ≡⟨ sym (disjoint-∪≡ (∩-complementʳ a)) ⟩ ∣ a ∪ ∁ a ∣
-                                                 ≡⟨ cong size (∪-complementʳ a) ⟩ ∣ ⊤{n} ∣
-                                                 ≡⟨ ∣⊤∣{n} ⟩ n ∎ 
-    where
-      open P.≡-Reasoning
--}      
-  -- intersection
+∣p∣<∣q∣⇒∣∁q∣<∣∁p∣ : ∀ {n} (p q : Subset n) → ∣ p ∣ ℕ.< ∣ q ∣ → ∣ ∁ q ∣ ℕ.< ∣ ∁ p ∣
+∣p∣<∣q∣⇒∣∁q∣<∣∁p∣ p q p<q = NP.+-cancelˡ-< ∣ q ∣
+  (begin-strict ∣ q ∣ ℕ.+ ∣ ∁ q ∣ ≡⟨ ∣p∣+∣∁p∣≡n q ⟩ _ ≡⟨ sym (∣p∣+∣∁p∣≡n p) ⟩ ∣ p ∣ ℕ.+ ∣ ∁ p ∣ <⟨ NP.+-monoˡ-< _ p<q ⟩  ∣ q ∣ ℕ.+ ∣ ∁ p ∣ ∎)
+  where
+    open NP.≤-Reasoning
+-- intersection
 {-  
   
 
