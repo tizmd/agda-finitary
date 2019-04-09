@@ -1,8 +1,8 @@
-module Data.Finitary.FinType where
+module Data.Finitude.FinType where
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Data.Nat as ℕ
 open import Data.Fin as Fin using (Fin; #_)
-open import Data.Finitary
+open import Data.Finitude
 open import Function.Equality using (_⟨$⟩_)
 open import Function.Injection as Inj using (Injective)
 open import Function.Inverse as Inv using (Inverse)
@@ -14,29 +14,29 @@ open import Data.Vec.Membership.Propositional.Distinct as Distinct using (Distin
 record FinType {a} (A : Set a) : Set a where
   field
     size : ℕ
-    finitary : Finitary (P.setoid A) size
+    finitude : Finitude (P.setoid A) size
   open import Data.Vec.Properties   
   
   index  : A → Fin size
-  index  = Inverse.to finitary ⟨$⟩_
+  index  = Inverse.to finitude ⟨$⟩_
 
   index-injective : ∀ {x y} → index x ≡ index y → x ≡ y
-  index-injective = Inverse.injective finitary
+  index-injective = Inverse.injective finitude
 
   enum  : Fin size → A
-  enum = Inverse.from finitary ⟨$⟩_
+  enum = Inverse.from finitude ⟨$⟩_
 
   enum-injective : ∀ {i j} → enum i ≡ enum j → i ≡ j
-  enum-injective = Inverse.injective (Inv.sym finitary)
+  enum-injective = Inverse.injective (Inv.sym finitude)
 
   elems : Vec A size
   elems = tabulate enum  
 
   elems-distinct : Distinct elems
-  elems-distinct = Distinct.tabulate (Inverse.injection (Inv.sym finitary))
+  elems-distinct = Distinct.tabulate (Inverse.injection (Inv.sym finitude))
 
   _∈elems : ∀ x → x ∈ elems
-  x ∈elems rewrite P.sym (Inverse.left-inverse-of finitary x) = ∈-tabulate⁺ enum (index x)
+  x ∈elems rewrite P.sym (Inverse.left-inverse-of finitude x) = ∈-tabulate⁺ enum (index x)
   
 open FinType ⦃ ... ⦄ using (index ; _∈elems)
 
@@ -53,7 +53,7 @@ instance
   empty   : FinType ⊥
   empty = record {
             size = 0
-          ; finitary = record {
+          ; finitude = record {
               to = P.→-to-⟶ λ()
             ; from = P.→-to-⟶ λ()
             ; inverse-of = record {
@@ -67,7 +67,7 @@ instance
   unit   : FinType ⊤
   unit   = record {
           size = 1
-        ; finitary = record {
+        ; finitude = record {
           to = P.→-to-⟶ λ _ → Fin.zero
         ; from = P.→-to-⟶ λ _ → tt
         ; inverse-of = record {
@@ -80,7 +80,7 @@ instance
   bool    : FinType Bool
   bool    = record {
           size = 2
-        ; finitary = record {
+        ; finitude = record {
             to = P.→-to-⟶ λ { false → # 0 ; true → # 1 }
           ; from = P.→-to-⟶ λ { Fin.zero → false ; (Fin.suc Fin.zero) → true ; (Fin.suc (Fin.suc ())) }
           ; inverse-of = record {

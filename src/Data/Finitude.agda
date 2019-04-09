@@ -1,4 +1,4 @@
-module Data.Finitary where
+module Data.Finitude where
 
 open import Data.Fin as Fin
 open import Data.Nat as ℕ
@@ -14,15 +14,15 @@ open import Relation.Binary
 import Relation.Binary.PropositionalEquality as P
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 
-Finitary : ∀ {a ℓ} (A : Setoid a ℓ) (n : ℕ) → Set _
-Finitary A n = Inverse A (P.setoid (Fin n))
+Finitude : ∀ {a ℓ} (A : Setoid a ℓ) (n : ℕ) → Set _
+Finitude A n = Inverse A (P.setoid (Fin n))
 
 module Subset where
   open import Data.Product as Prod hiding (map)
   open import Data.Fin.Subset using (Subset; _∈_; outside; inside; ∣_∣) renaming (⊥ to ∅)
   open import Data.Vec 
-  subset-finitary : ∀ {n}(s : Subset n) → Finitary (P.setoid (∃ (_∈ s))) ∣ s ∣
-  subset-finitary {ℕ.zero} [] = record {
+  subset-finitude : ∀ {n}(s : Subset n) → Finitude (P.setoid (∃ (_∈ s))) ∣ s ∣
+  subset-finitude {ℕ.zero} [] = record {
       to = P.→-to-⟶ (λ ())
     ; from = P.→-to-⟶ (λ () )
     ; inverse-of = record {
@@ -30,7 +30,7 @@ module Subset where
       ; right-inverse-of = λ ()
       }
     }
-  subset-finitary {ℕ.suc n} (inside ∷ s) = record {
+  subset-finitude {ℕ.suc n} (inside ∷ s) = record {
         to = P.→-to-⟶ λ { (_ , here) → Fin.zero 
                           ; (_ , there p) → Fin.suc (to ⟨$⟩ (_ , p)) } 
       ; from = P.→-to-⟶ λ { Fin.zero → _ , here
@@ -44,11 +44,11 @@ module Subset where
         }
       }
     where
-      open Inverse (subset-finitary s) 
+      open Inverse (subset-finitude s) 
       open _InverseOf_ inverse-of renaming (left-inverse-of to linv
                                            ;right-inverse-of to rinv)
       
-  subset-finitary {ℕ.suc n} (outside ∷ s) = record {
+  subset-finitude {ℕ.suc n} (outside ∷ s) = record {
       to = P.→-to-⟶ (λ { (_ , there p) → to ⟨$⟩ (_ , p)})
     ; from = P.→-to-⟶ (λ i → Prod.map Fin.suc there (from ⟨$⟩ i) )
     ; inverse-of = record {
@@ -58,7 +58,7 @@ module Subset where
       }
     }
       where
-        open Inverse (subset-finitary s)
+        open Inverse (subset-finitude s)
         open _InverseOf_ inverse-of renaming ( left-inverse-of to linv
                                              ; right-inverse-of to rinv)
                                                           

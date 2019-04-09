@@ -1,5 +1,5 @@
-module Data.Finitary.Exponent where
-open import Data.Finitary
+module Data.Finitude.Exponent where
+open import Data.Finitude
 open import Data.Fin as Fin using (Fin; toℕ)
 open import Data.Nat
 open import Data.Vec as Vec
@@ -14,7 +14,7 @@ open import Data.Sum
 open import Data.Empty
 open import Relation.Binary
 
-exponent : ∀ {m} {n} → Finitary (P.setoid (Vec (Fin m) n)) (m ^ n)
+exponent : ∀ {m} {n} → Finitude (P.setoid (Vec (Fin m) n)) (m ^ n)
 exponent {m} {n} = record {
     to = P.→-to-⟶ to
   ; from = P.→-to-⟶ from
@@ -139,15 +139,15 @@ exponent {m} {n} = record {
             open ≡-Reasoning
       
 
-⟶-finitary-toVec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A m → Finitary B n
+⟶-finitude-toVec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitude A m → Finitude B n
              → A ⟶ B → Vec (Fin n) m
-⟶-finitary-toVec finA finB f = Vec.tabulate
+⟶-finitude-toVec finA finB f = Vec.tabulate
                                    (λ i → (Inverse.to finB  F.∘ f F.∘ Inverse.from finA) ⟨$⟩ i )
                                    
              
-⟶-finitary-fromVec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A m → Finitary B n
+⟶-finitude-fromVec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitude A m → Finitude B n
              → Vec (Fin n) m → A ⟶ B
-⟶-finitary-fromVec {A = SA}{B = SB} finA finB vec =
+⟶-finitude-fromVec {A = SA}{B = SB} finA finB vec =
   record {   _⟨$⟩_ = f
           ;  cong  = f-cong   }
   where
@@ -161,19 +161,19 @@ exponent {m} {n} = record {
                            (P.cong (flip Vec.lookup vec) (F.cong (Inverse.to finA) x≈y))
                        
         
-⟶-finitary↔Vec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A n → Finitary B m
+⟶-finitude↔Vec : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitude A n → Finitude B m
                  → Inverse (A ⇨ B) (P.setoid (Vec (Fin m) n))
-Inverse.to (⟶-finitary↔Vec {m} {n} {A = S₁} {S₂} finA finB) ._⟨$⟩_ = ⟶-finitary-toVec finA finB
-Inverse.to (⟶-finitary↔Vec {m} {n} {A = S₁} {S₂} finA finB) .F.cong {f} {g} eq = tabulate-cong ( λ i →
+Inverse.to (⟶-finitude↔Vec {m} {n} {A = S₁} {S₂} finA finB) ._⟨$⟩_ = ⟶-finitude-toVec finA finB
+Inverse.to (⟶-finitude↔Vec {m} {n} {A = S₁} {S₂} finA finB) .F.cong {f} {g} eq = tabulate-cong ( λ i →
   F.cong (Inverse.to finB) (eq ≈₁-refl) )
   where
     open import Data.Vec.Properties 
     open Setoid S₁ renaming (isEquivalence to isEquivalence₁)
     open IsEquivalence isEquivalence₁ renaming (refl to ≈₁-refl)
 
-Inverse.from (⟶-finitary↔Vec finA finB) = P.→-to-⟶ (⟶-finitary-fromVec finA finB)
-Inv._InverseOf_.left-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec {m = m}{n}{A = S₁} {S₂} finA finB)) f {x}{y} x≈y = 
-  begin ⟶-finitary-fromVec finA finB (⟶-finitary-toVec finA finB f) ⟨$⟩ x
+Inverse.from (⟶-finitude↔Vec finA finB) = P.→-to-⟶ (⟶-finitude-fromVec finA finB)
+Inv._InverseOf_.left-inverse-of (Inverse.inverse-of (⟶-finitude↔Vec {m = m}{n}{A = S₁} {S₂} finA finB)) f {x}{y} x≈y = 
+  begin ⟶-finitude-fromVec finA finB (⟶-finitude-toVec finA finB f) ⟨$⟩ x
          ≈⟨ F.cong (Inverse.from finB) lemma  ⟩ _
          ≈⟨ linv₂ _  ⟩ _
          ≈⟨ F.cong f (linv₁ x) ⟩ _
@@ -189,7 +189,7 @@ Inv._InverseOf_.left-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec {m = m}{
     lemma = lookup∘tabulate F (Inverse.to finA ⟨$⟩ x)
     linv₁ = finA .Inverse.inverse-of .Inv._InverseOf_.left-inverse-of
     linv₂ = finB .Inverse.inverse-of .Inv._InverseOf_.left-inverse-of
-Inv._InverseOf_.right-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec finA finB)) vec =
+Inv._InverseOf_.right-inverse-of (Inverse.inverse-of (⟶-finitude↔Vec finA finB)) vec =
   begin _  ≡⟨ tabulate-cong lemma ⟩ _ 
            ≡⟨ tabulate∘lookup vec ⟩ vec ∎
   where
@@ -197,10 +197,10 @@ Inv._InverseOf_.right-inverse-of (Inverse.inverse-of (⟶-finitary↔Vec finA fi
     open P.≡-Reasoning
     rinv₁ = finA .Inverse.inverse-of .Inv._InverseOf_.right-inverse-of
     rinv₂ = finB .Inverse.inverse-of .Inv._InverseOf_.right-inverse-of
-    lemma : Inverse.to finB F.∘ (⟶-finitary-fromVec finA finB vec) F.∘ Inverse.from finA ⟨$⟩_ ≗ flip lookup vec
+    lemma : Inverse.to finB F.∘ (⟶-finitude-fromVec finA finB vec) F.∘ Inverse.from finA ⟨$⟩_ ≗ flip lookup vec
     lemma i = begin _ ≡⟨ rinv₂ _ ⟩ _
                       ≡⟨ P.cong (flip lookup vec) (rinv₁ i)  ⟩ lookup i vec ∎
                       
-⟶-finitary : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitary A n → Finitary B m
-                 → Finitary (A ⇨ B) (m ^ n)
-⟶-finitary finA finB = exponent  Inv.∘ (⟶-finitary↔Vec finA finB)                 
+⟶-finitude : ∀{m n a b p q}{A : Setoid a p}{B : Setoid b q} → Finitude A n → Finitude B m
+                 → Finitude (A ⇨ B) (m ^ n)
+⟶-finitude finA finB = exponent  Inv.∘ (⟶-finitude↔Vec finA finB)                 

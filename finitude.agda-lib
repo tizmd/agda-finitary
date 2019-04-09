@@ -1,0 +1,3 @@
+name: finitude
+depend: standard-library distinct-disjoint
+include: src
